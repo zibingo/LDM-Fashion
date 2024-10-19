@@ -452,7 +452,7 @@ class LatentDiffusion(DDPM):
                  scale_by_std=False,
                  #---------------------------------
                  probability_of_discard=0.,
-                 scale_1 = 1.0,   # 双条件的扩散模型，控制无条件与有条件的尺度
+                 scale_1 = 1.0,  
                  scale_2 = 1.0,
                  style_loss_weight=0.001,
                  vgg_loss_config = None,
@@ -693,10 +693,7 @@ class LatentDiffusion(DDPM):
         encoder_posterior = self.encode_first_stage(x)
         z = self.get_first_stage_encoding(encoder_posterior).detach()
         #---------------------------------------------------------------------------------------------------------
-        # 生成一个0到1之间的随机数
         random_number = torch.rand(1).item()
-
-        # 根据0.1的概率将c设置为0
         if random_number <  self.probability_of_discard:
             c = {"sketch": torch.zeros_like(sketch), "texture": torch.zeros_like(texture)}
         else:
@@ -1030,17 +1027,12 @@ class LatentDiffusion(DDPM):
             raise NotImplementedError()
 
         #---------------------------------------------------------------------
-        # 风格损失
         style_loss = torch.FloatTensor([0.]).to(self.device)
         if self.is_use_style_loss:
             pred_x_start_low = self.predict_start_from_noise(x_noisy, t=t, noise=model_output).to(self.device)
             pred_x_start_high = self.decode_first_stage(pred_x_start_low).to(self.device)
             x_start_high = self.decode_first_stage(x_start).to(self.device)
-            style_loss = self.vgg_loss.Batch_Style_Loss(pred_x_start_high, x_start_high).squeeze() # shape为[1]->shape为[]
-            # # 除batch维度，得到形状 (3, 256, 256)  在宽度维度上合并图片，得到形状 (3, 256, 512) 将图片重新添加batch维度，得到形状 (1, 3, 256, 512)
-            # combined_image = torch.cat((pred_x_start_high.squeeze(0), x_start_high.squeeze(0)), dim=2).unsqueeze(0)
-            # # 获取用户主目录保存合并后的图片
-            # save_image(combined_image, os.path.join("/home/gjh303/luzibin/my-latent-diffusion",'pred_x_start_and_x_start.jpg'))
+            style_loss = self.vgg_loss.Batch_Style_Loss(pred_x_start_high, x_start_high).squeeze()
         #---------------------------------------------------------------------
 
         loss_simple = self.get_loss(model_output, target, mean=False).mean([1, 2, 3])
@@ -1064,7 +1056,6 @@ class LatentDiffusion(DDPM):
         loss += (self.original_elbo_weight * loss_vlb)
         loss_dict.update({f'{prefix}/loss': loss})
         #------------------------------------------------------------------------
-        # 加入风格损失到loss
         loss_dict.update({f'{prefix}/loss_style': style_loss})
         loss += (self.style_loss_weight * style_loss)
         #------------------------------------------------------------------------

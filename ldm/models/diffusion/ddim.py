@@ -175,17 +175,6 @@ class DDIMSampler(object):
         else:
             x_in = torch.cat([x] * 3)
             t_in = torch.cat([t] * 3)
-            # c_in = torch.cat([unconditional_conditioning, c])
-            # 双条件全置空,拼接无条件与有条件，同时放进模型里，然后输出再分割
-            # c_in=dict()
-            # cond = []
-            # for i in range(len(c["cond"])):
-            #     cond.append(torch.cat([unconditional_conditioning["two_zero"][i], c["cond"][i]]))
-            # c_in["cond"] = cond
-            # e_t_uncond, e_t = self.model.apply_model(x_in, t_in, c_in).chunk(2) 
-            # e_t = e_t_uncond + unconditional_guidance_scale * (e_t - e_t_uncond)
-            
-            # 双条件置空、单条件置空、全条件
             c_in = dict()
             cond = []
             for i in range(len(c["cond"])):
