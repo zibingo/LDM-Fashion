@@ -1,5 +1,5 @@
 # BF-Fashion
-
+![BF-Fashion](FrameWork.jpg)
 # 1.Dataset
 
 Download the [Cleaned Type-aware Dataset](https://github.com/AemikaChow/AiDLab-fAshIon-Data/blob/main/Datasets/cleaned-type.md) and 
