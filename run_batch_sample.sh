@@ -1,0 +1,1 @@
+nohup python m_class_batch_sample.py > /dev/null 2>&1 &
